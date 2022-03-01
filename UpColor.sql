@@ -21,6 +21,8 @@ create table accounts (
     github_account varchar(255),
     introduction varchar(1000),
     project_num int,
+    project_name varchar(80),
+    project_image varchar(80),
     template_id int not null,
     release_flg int not null
 );
@@ -37,10 +39,9 @@ create table qual (
     foreign key(user_id) references accounts(user_id) on delete cascade
 );
 
-create table projects (
+create table tools (
     user_id int not null,
-    project_title varchar(255) not null,
-    project_img varchar(255),
+    tool_name varchar(255) not null,
     foreign key(user_id) references accounts(user_id) on delete cascade
 );
 
@@ -70,34 +71,35 @@ create table favorite (
     foreign key(favorited_id) references accounts(user_id) ON DELETE CASCADE
 );
 
-insert into accounts(user_name, user_mail, password, profile_img, bg_color, couse_id, template_id, release_flg) values
-('Genki', '2112059@i-seifu.jp', '2021gakusei', '../../profile_images/onishi.jpg', '#2f4f4f', 1, 1, 1),
-('arao', '1111111@i-seifu.jp', '2021gakusei', '../../profile_images/dog1.jpg', '#191970', 3, 1, 1),
-('inui', '1111112@i-seifu.jp', '2021gakusei', '../../profile_images/dog2.jpg', '#fffafa', 2, 1, 1),
-('nishant', '1111113@i-seifu.jp', '2021gakusei', '../../profile_images/dog3.jpg', '#98fb98', 1, 1, 1),
-('print', '1111114@i-seifu.jp', '2021gakusei', '../../profile_images/dog4.jpg', '#ffb6c1', 3, 1, 1),
-('dog', '1111115@i-seifu.jp', '2021gakusei', '', '#ffff00', 2, 1, 1),
-('cap', '1111116@i-seifu.jp', '2021gakusei', '', '#ff00ff', 4, 1, 1),
-('komeda', '1111117@i-seifu.jp', '2021gakusei', '', '#00fa9a', 1, 1, 1),
-('apple', '1111118@i-seifu.jp', '2021gakusei', '', '#00bfff', 4, 1, 1),
-('orange', '1111119@i-seifu.jp', '2021gakusei', '', '#b22222', 1, 1, 1),
-('test1', 'test1@i-seifu.jp', '$2y$10$HYmP3YBwtXQN4AbYOyqXVOzTlN5nmcFYVkRsmxx1JG/2SiGveYspW', '../../profile_images/test1.png', '#66fcff', 1, 1, 1),
-('test2', 'test2@i-seifu.jp', '$2y$10$cYWm8iqzRRUE5EmH9FV4aOpP/mjbneqd2Gvu1hV2uCv5U9oTaTBV.', '../../profile_images/test2.png', '#4bf529', 1, 1, 1),
-('test3', 'test3@i-seifu.jp', '$2y$10$ZUG5x90YeFMmfDbNEWvWX.PYTAESDzowU6K13F2jFVrewpphKMYAi', '../../profile_images/test3.jpeg', '#f59ed1', 1, 1, 1);
-
 insert into couses values(null, "本科");
-insert into couses values(null, "情報処理専攻");
+insert into couses values(null, "情報処理・ネットワーク専攻");
 insert into couses values(null, "ゲーム専攻");
-insert into couses values(null, "デザイン専攻");
+insert into couses values(null, "デザイン・イラスト専攻");
 insert into couses values(null, "ハードウェア専攻");
 
-insert into programming_lans values(1, 'C');
-insert into programming_lans values(1, 'php');
-insert into programming_lans values(1, 'sql');
-insert into programming_lans values(1, 'python');
-insert into programming_lans values(2, 'C');
-insert into programming_lans values(2, 'php');
-insert into programming_lans values(2, 'python');
-insert into programming_lans values(3, 'C');
-insert into programming_lans values(4, 'C');
-insert into programming_lans values(4, 'python');
+-- insert into accounts(user_name, user_mail, password, profile_img, bg_color, couse_id, template_id, release_flg) values
+-- ('Genki', '2112059@i-seifu.jp', '2021gakusei', '../../profile_images/onishi.jpg', '#2f4f4f', 1, 1, 1),
+-- ('arao', '1111111@i-seifu.jp', '2021gakusei', '../../profile_images/dog1.jpg', '#191970', 3, 1, 1),
+-- ('inui', '1111112@i-seifu.jp', '2021gakusei', '../../profile_images/dog2.jpg', '#fffafa', 2, 1, 1),
+-- ('nishant', '1111113@i-seifu.jp', '2021gakusei', '../../profile_images/dog3.jpg', '#98fb98', 1, 1, 1),
+-- ('print', '1111114@i-seifu.jp', '2021gakusei', '../../profile_images/dog4.jpg', '#ffb6c1', 3, 1, 1),
+-- ('dog', '1111115@i-seifu.jp', '2021gakusei', '', '#ffff00', 2, 1, 1),
+-- ('cap', '1111116@i-seifu.jp', '2021gakusei', '', '#ff00ff', 4, 1, 1),
+-- ('komeda', '1111117@i-seifu.jp', '2021gakusei', '', '#00fa9a', 1, 1, 1),
+-- ('apple', '1111118@i-seifu.jp', '2021gakusei', '', '#00bfff', 4, 1, 1),
+-- ('orange', '1111119@i-seifu.jp', '2021gakusei', '', '#b22222', 1, 1, 1),
+-- ('test1', 'test1@i-seifu.jp', '$2y$10$HYmP3YBwtXQN4AbYOyqXVOzTlN5nmcFYVkRsmxx1JG/2SiGveYspW', '../../profile_images/test1.png', '#66fcff', 1, 1, 1),
+-- ('test2', 'test2@i-seifu.jp', '$2y$10$cYWm8iqzRRUE5EmH9FV4aOpP/mjbneqd2Gvu1hV2uCv5U9oTaTBV.', '../../profile_images/test2.png', '#4bf529', 1, 1, 1),
+-- ('test3', 'test3@i-seifu.jp', '$2y$10$ZUG5x90YeFMmfDbNEWvWX.PYTAESDzowU6K13F2jFVrewpphKMYAi', '../../profile_images/test3.jpeg', '#f59ed1', 1, 1, 1);
+
+
+-- insert into programming_lans values(1, 'C');
+-- insert into programming_lans values(1, 'php');
+-- insert into programming_lans values(1, 'sql');
+-- insert into programming_lans values(1, 'python');
+-- insert into programming_lans values(2, 'C');
+-- insert into programming_lans values(2, 'php');
+-- insert into programming_lans values(2, 'python');
+-- insert into programming_lans values(3, 'C');
+-- insert into programming_lans values(4, 'C');
+-- insert into programming_lans values(4, 'python');

@@ -85,14 +85,14 @@ if (basename($_SERVER["REQUEST_URI"]) == 'profile-edit.php') {
                 </li>
                 <li class="divider"></li>
                 <li>
-                <button type="submit" name="couse" class="btn btn-link" value="2">情報処理ネットワーク専攻</button>
+                <button type="submit" name="couse" class="btn btn-link" value="2">情報処理・ネットワーク専攻</button>
                 </li>
                 <li>
                 <button type="submit" name="couse" class="btn btn-link" value="3">ゲーム専攻</button></li>
                 </li>
 
                 <li>
-                <button type="submit" name="couse" class="btn btn-link" value="4">デザイン専攻</button>
+                <button type="submit" name="couse" class="btn btn-link" value="4">デザイン・イラスト専攻</button>
                 </li>
 
                 <li>

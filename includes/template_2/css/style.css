@@ -20,7 +20,7 @@ body {
     list-style-type: none;
     color: #fff;
     display: inline-block;
-    float: left;
+
     margin-right: 20px;
 }
 
@@ -40,9 +40,9 @@ body {
 .social-profile .user-profile {
     position: absolute;
     bottom: -75px;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    border-radius: 100%;
     left: 50px;
 }
 
@@ -169,6 +169,7 @@ ul.friend-list .right p {
 .social-about .social-info {
     font-size: 16px;
     margin-bottom: 20px;
+
 }
 
 .social-about p {
@@ -238,7 +239,7 @@ ul.friend-list .right p {
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    width: 100px;
+    width: 200px;
     height: auto;
 }
 

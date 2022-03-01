@@ -1,11 +1,13 @@
 <?php
-if (strpos(basename($_SERVER["REQUEST_URI"]), 'index.php') !== false && empty($_SESSION['account'])) {
+$favorite = '';
+if ((strpos(basename($_SERVER["REQUEST_URI"]), 'index.php') !== false || strpos(basename($_SERVER["REQUEST_URI"]), '') !== false) && empty($_SESSION['account'])) {
     $title = '';
     $contents = '';
 
     // ログインしていない場合何も出さない
 } else if (empty($_SESSION['account'])) {
     $title = <<<HTML
+        <i class="fa fa-user" aria-hidden="true"></i>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             ログイン<b class="caret"></b>
         </a>
@@ -23,7 +25,7 @@ if (strpos(basename($_SERVER["REQUEST_URI"]), 'index.php') !== false && empty($_
     HTML;
 
     //データベースからユーザーIDを取得
-} else {
+} else if (isset($_SESSION['account'])) {
     $s = <<<SQL
         SELECT user_name
         FROM accounts
@@ -34,6 +36,7 @@ if (strpos(basename($_SERVER["REQUEST_URI"]), 'index.php') !== false && empty($_
     $nav_name = $sql -> fetch(PDO::FETCH_ASSOC);
 
     $title = <<<HTML
+        <i class="fa fa-user" aria-hidden="true"></i>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             $nav_name[user_name]<b class="caret"></b>
         </a>
@@ -56,6 +59,11 @@ if (strpos(basename($_SERVER["REQUEST_URI"]), 'index.php') !== false && empty($_
             </li>
         </ul>
     HTML;
+
+    $favorite = <<<HTML
+        <hr class="dropdown-divider">
+        <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?favorite=1">お気に入り</a>
+    HTML;
 }
 
 $nav_couse = '';
@@ -71,7 +79,16 @@ if (isset($_GET['couse'])) {
         <div class="row">
             <div class="col-12">
                 <nav class="navbar navbar-expand-lg navbar-light  start-header start-style" role="navigation">
-                    <a class="navbar-brand" href="URL/../../home/introduction.php">UpColor</a>
+                    <a href="URL/../../home/">
+                        <img src = "../../includes/images/Up.png">
+                    </a>
+
+
+
+
+                    <hr class = "mr-3">
+
+                    <a class="navbar-brand" href="URL/../../home/">UpColor</a>
 
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -87,10 +104,11 @@ if (isset($_GET['couse'])) {
                                     <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php">プロフィール</a>
                                     <hr class="dropdown-divider">
                                     <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=1">本科</a>
-                                    <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=2">情報処理ネットワーク専攻</a>
+                                    <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=2">情報処理・ネットワーク専攻</a>
                                     <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=3">ゲーム専攻</a>
-                                    <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=4">デザイン専攻</a>
+                                    <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=4">デザイン・イラスト専攻</a>
                                     <a class="dropdown-item" href="URL/../../profile_view/profile_thumbnail.php?couse=5">ハードウェア専攻</a>
+                                    <?= $favorite ?>
                                 </div>
                             </li>
                             <form action="URL/../../profile_view/profile_thumbnail.php" class="form-inline" method="POST">
@@ -101,7 +119,7 @@ if (isset($_GET['couse'])) {
                     </div>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <i class="fa fa-user" aria-hidden="true"></i>
+
                             <?= $title ?>
                             <?= $contents ?>
                         </li>
@@ -115,7 +133,7 @@ if (isset($_GET['couse'])) {
 
 
 <script>
-/* Please ❤ this if you like it! */
+
 
 
 (function($) { "use strict";

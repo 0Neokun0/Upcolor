@@ -109,12 +109,109 @@ $(function(){
 });
 // ----------------------------------------------
 
+// 資格
+
+let qualminCount = 1;
+let qualmaxCount = 5;
+
+$(function(){
+    // プラスのボタンを押された時に動く
+    $('#qual-plus').click(function(){
+
+        // id="demo-area"の入力フォームの数を取得
+        let qualinputCount = $('#qual-area .unit2').length;
+
+        if (qualinputCount < qualmaxCount){
+
+            // class="unit"の最後の要素をコピーする
+            let element = $('#qual-area .unit2:last-child').clone(true);
+
+            // 1つ目のinput(type="text")の要素を持ってくる
+            let qualinputList = element[0].querySelectorAll('input[type="text"]');
+
+            for (let i = 0; i < qualinputList.length; i++) {
+
+                // 新しく追加するフォームのvalueを初期化
+                qualinputList[i].value = "";
+
+            }
+
+            // id="demo-area"に入力フォームを1つ追加
+            $('#qual-area .unit2').parent().append(element);
+        }
+    });
+
+    // マイナスのボタンを押された時に動く
+    $('.qual-minus').click(function(){
+
+        // id="demo-area"の入力フォームの数を取得
+        let qualinputCount = $('#qual-area .unit2').length;
+
+        if (qualinputCount > qualminCount){
+
+            // 選ばれたマイナスボタンの横のフォーム要素を削除する
+            $(this).parents('.unit2').remove();
+        }
+    });
+});
+
+
+// ----------------------------------------------
+
+// ツールとスキル
+
+let toolminCount = 1;
+let toolmaxCount = 5;
+
+$(function(){
+    // プラスのボタンを押された時に動く
+    $('#tool-plus').click(function(){
+
+        // id="demo-area"の入力フォームの数を取得
+        let toolinputCount = $('#tool-area .unit3').length;
+
+        if (toolinputCount < toolmaxCount){
+
+            // class="unit"の最後の要素をコピーする
+            let element = $('#tool-area .unit3:last-child').clone(true);
+
+            // 1つ目のinput(type="text")の要素を持ってくる
+            let toolinputList = element[0].querySelectorAll('input[type="text"]');
+
+            for (let i = 0; i < toolinputList.length; i++) {
+
+                // 新しく追加するフォームのvalueを初期化
+                toolinputList[i].value = "";
+
+            }
+
+            // id="demo-area"に入力フォームを1つ追加
+            $('#tool-area .unit3').parent().append(element);
+        }
+    });
+
+    // マイナスのボタンを押された時に動く
+    $('.tool-minus').click(function(){
+
+        // id="demo-area"の入力フォームの数を取得
+        let toolinputCount = $('#tool-area .unit3').length;
+
+        if (toolinputCount > toolminCount){
+
+            // 選ばれたマイナスボタンの横のフォーム要素を削除する
+            $(this).parents('.unit3').remove();
+        }
+    });
+});
+
+
+// ----------------------------------------------
 
 // ログアウト用
 // ----------------------------------------------
 $(function(){
     $("#logout").click(function(){
-        var result= window.confirm('ログアウトします。よろしいですか？');
+        let result = window.confirm('ログアウトします。よろしいですか？');
         if(result){
             window.location.href = "../logout.php";
         }
@@ -124,8 +221,16 @@ $(function(){
 
 // urlコピー用
 // ----------------------------------------------
+// const button = document.querySelector('#button')
+// button.addEventListener('click', () => {
+//     const copy_target = document.getElementById('url').value;
+//     navigator.clipboard.writeText(copy_target);
+
+// });
+
 function copyToClipboard() {
-    // コピー対象のテキストを選択す
+    // コピー対象のテキストを選択する
+
     let copy_target = document.getElementById('url').value;
 
     navigator.clipboard.writeText(copy_target);
@@ -134,7 +239,6 @@ function copyToClipboard() {
     alert("コピーできました！ : " + copy_target);
 }
 // ----------------------------------------------
-
 
 // お気に入り用
 // ----------------------------------------------
@@ -205,7 +309,7 @@ function read_message() {
     })
     .then(
         function (data) {
-            $('#messageTextBox').html(data);
+            $('#chat-content').html(data);
         },
         function () {
             alert("読み込み失敗");

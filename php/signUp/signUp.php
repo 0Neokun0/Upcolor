@@ -74,6 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($user_mail)) {
 
+        if (strpos('/^[0-9]{7}$/', $user_mail)) {
+            var_dump($user_mail);
+        }
+
         // Prepare a select statement
         // selectステートメントを準備します
 
@@ -115,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate password
     // パスワードを検証します
 
-    if (empty($confirm_password)) {
+    if (empty($password)) {
         $password_err = 'パスワードを入力してください';
     } else if (strlen($password) < 6) {
         $password_err = 'パスワードは最低でも6文字必要です';
@@ -127,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($confirm_password)) {
         $confirm_password_err = 'パスワードを再入力してください';
     } else if ($password !== $confirm_password) {
-        $cofnirm_password_err = 'パスワードが間違っています';
+        $confirm_password_err = 'パスワードが一致していません';
     }
 
     // Make sure errors are empty
@@ -180,7 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ];
                 }
 
-                header('Location: ../profile/profile_edit.php');
+                header('Location: ../welcome_to_upcolor/');
+
             } else {
                 die('実行失敗');
             }
@@ -198,29 +203,29 @@ require_once('../navbar.php');
 ?>
 
 <div class="container">
-    <div class="row">
+    <div class="row mt-5">
         <div class="col-md-6 mx-auto">
             <div class="card card-body bg-light mt-5">
                 <h2>アカウントを作成</h2>
                 <p>このフォームに記入して登録してください</p>
                 <form action="<?= $_SERVER['PHP_SELF']; ?>" method="POST">
                     <div class="form-group mt-3">
-                        <label for="name">ユーザー名</label>
+                        <label for="name"><i class="fa fa-user-plus mr-2" aria-hidden="true"></i>ユーザー名</label>
                         <input type="text" name="user_name" class="form-control form-control-lg <?= (!empty($user_name_err)) ? 'is-invalid' : ''; ?>" value="<?= $user_name ?>" autofocus>
                         <span class="invalid-feedback"><?= $user_name_err; ?></span>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="mail">メール</label>
-                        <input type="mail" name="user_mail" class="form-control form-control-lg <?= (!empty($user_mail_err)) ? 'is-invalid' : ''; ?>" value="<?= $user_mail; ?>">
+                        <label for="mail"><i class="fa fa-envelope mr-2" aria-hidden="true"></i>メール</label>
+                        <input type="mail" name="user_mail" class="form-control form-control-lg <?= (!empty($user_mail_err)) ? 'is-invalid' : ''; ?>" value="<?= $user_mail; ?>" placeholder="2100002@i-seifu.jp">
                         <span class="invalid-feedback"><?= $user_mail_err; ?></span>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="password">パスワード</label>
+                        <label for="password"><i class="fa fa-unlock-alt mr-2" aria-hidden="true"></i>パスワード</label>
                         <input type="password" name="password" class="form-control form-control-lg <?= (!empty($password_err)) ? 'is-invalid' : ''; ?>">
                         <span class="invalid-feedback"><?= $password_err; ?></span>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="confirm_password">パスワードを認証</label>
+                        <label for="confirm_password"><i class="fa fa-unlock mr-2" aria-hidden="true"></i>パスワードを認証</label>
                         <input type="password" name="confirm_password" class="form-control form-control-lg <?= (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>">
                         <span class="invalid-feedback"><?= $confirm_password_err; ?></span>
                     </div>
@@ -229,7 +234,7 @@ require_once('../navbar.php');
                             <input type="submit" value="登録" class="btn btn-success btn-block">
                         </div>
                         <div class="col">
-                            <a href="../signIn/signIn.php" class="btn btn-light btn-block">アカウントを持っています？ ログインする</a>
+                            <a href="../signIn/signIn.php" class="btn btn-light btn-block">既にアカウントを持っている方はこちら</a>
                         </div>
                     </div>
                 </form>

@@ -1,0 +1,129 @@
+* {
+    outline: none !important;
+    box-shadow: none;
+}
+
+a {
+    color: rgb(32, 178, 170);
+}
+
+a:hover {
+    color: #000;
+}
+
+
+
+body {
+    overflow-x: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+p {
+    font-size: 17px;
+    font-family: 'Raleway', sans-serif;
+    letter-spacing: 1px;
+    line-height: 31px;
+}
+
+.rowrow
+{
+    position:center;
+
+
+}
+ul li
+{
+    list-style: none;
+    display: inline-block;
+}
+li a
+{
+    text-decoration: none;
+}
+#heading-text
+{
+    padding-top: 10px;
+    text-align: center;
+
+}
+#heading-text h3 {
+
+    font-size: 49px;
+    font-family: 'Roboto', sans-serif;
+    padding-top: 58px;
+    text-transform: uppercase;
+    background-position: center;
+
+}
+
+#heading-text p {
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Roboto', sans-serif;
+    padding: 5px 0px
+}
+
+
+
+#wrapper
+{
+    background: url(../img/back.jpg);
+    background-attachment: fixed;
+    background-position: top;
+    background-size: cover;
+
+}
+#overlay-1
+{
+    background-color: rgba(40, 40, 40, 0.6);
+
+    position: relative;
+}
+
+.starting-text
+{
+    padding: 177px 0px;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #000;
+    letter-spacing: 2px;
+    height: max-content;
+}
+.rene {
+    font-size: 120px;
+    color: white;
+    font-family: "omnes-pro", "Helvetica", sans-serif;
+    font-weight: 300;
+    margin-top: 10px;
+}
+
+.starting-text h2 {
+    font-family: "omnes-pro", "Helvetica", sans-serif;
+    color: #fff;
+}
+
+.bottom
+{
+    width: 100%;
+    position: absolute;
+    bottom: 2%;
+}
+.bottom a
+{
+    color: rgba(192, 192, 192, 0.5);
+}
+h5
+{
+    padding-top: 22px;
+    font-size: 18px;
+}
+/*-----------------------------------------------------------------------------------------------------
+                            about us
+------------------------------------------------------------------------------------------------------*/
+
+.kuuhaku{
+    min-height: 20vh;
+}
+
+.button_wrapper{
+    text-align:center;
+ }

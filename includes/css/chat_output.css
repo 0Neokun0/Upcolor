@@ -1,0 +1,31 @@
+.from-me {
+	position:relative;
+	padding:10px 20px;
+	color:white;
+	background:#0B93F6;
+	border-radius:25px;
+    margin-left: auto;
+    margin-bottom: 5px ;
+    display: inline-block;
+    word-wrap: break-word;
+    align-self: flex-start;
+
+
+
+}
+
+
+.from-them {
+	position:relative;
+    display: inline-block;
+	padding:10px 20px;
+	background:#E5E5EA;
+	border-radius:25px;
+	color: black;
+	margin-right: auto;
+    margin-bottom: 5px ;
+    word-wrap: break-word;
+    align-self: flex-start;
+
+
+}

@@ -15,6 +15,8 @@ $favorited_id = '';
 if (isset($_POST['favorited_id']) && isset($_POST['InDel'])) {
     $favorited_id = $_POST['favorited_id'];
     $flg = $_POST['InDel'];
+} else {
+    exit;
 }
 
 if ($flg === 'true') {

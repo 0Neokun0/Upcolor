@@ -5,10 +5,10 @@ require_once('../config.php');
 login($_SESSION['account']);
 
 // 全変数初期化
-$user_name = $user_mail = $profile_img = $bg_color = $uppath = $couse_id = $introduction = $github_account = $project_name = $project_num = $qual_name = $project_link = $project_img = $template_id = $release = '';
+$user_name = $user_mail = $profile_img = $bg_color = $uppath = $couse_id = $introduction = $github_account = $project_title = $project_num = $qual_name = $project_img = $template_id = $release = '';
 
 // エラー初期化
-$profile_image_err = $couse_err = $github_err = '';
+$profile_image_err = $couse_err = $github_err = $pronum_err = '';
 
 if (isset($_POST['success'])) {
     if (is_uploaded_file($_FILES["profile_img"]["tmp_name"])) {
@@ -86,16 +86,15 @@ if (isset($_POST['success'])) {
     } else {
         $couse_err = '専攻を選択してください';
     }
-    // 自己紹介
-    if ($_POST['introduction']) {
-        $s = <<<SQL
-                INSERT accounts
-                    SET introduction=?
-                WHERE user_id=?
-        SQL;
-        $sql = $pdo -> prepare($s);
-        $sql -> execute([$_POST['introduction'], ID]);
-    }
+
+    // 自己紹介 about_tab
+    $s = <<<SQL
+        UPDATE accounts
+            SET introduction=?
+        WHERE user_id=?
+    SQL;
+    $sql = $pdo -> prepare($s);
+    $sql -> execute([$_POST['introduction'], ID]);
 
     // プログラミング言語入力
     if (isset($_POST['programming_lans'])) {
@@ -135,7 +134,26 @@ if (isset($_POST['success'])) {
             $sql = $pdo -> prepare($qual_update);
             $sql -> execute([ID, htmlspecialchars($row)]);
         }
+    }
 
+    // スキルツール入力
+    if (isset($_POST['tool_name'])) {
+        $tool = array_diff($_POST['tool_name'], array("",0,null));
+        $tool_delete = <<<SQL
+            DELETE
+            FROM tools
+            WHERE user_id=?
+        SQL;
+        $sql = $pdo -> prepare($tool_delete);
+        $sql -> execute([ID]);
+
+        $tool_update = <<<SQL
+            INSERT INTO tools values(?, ?)
+        SQL;
+        foreach ($tool as $row) {
+            $sql = $pdo -> prepare($tool_update);
+            $sql -> execute([ID, htmlspecialchars($row)]);
+        }
     }
 
     // githubアカウントリンク
@@ -151,6 +169,61 @@ if (isset($_POST['success'])) {
         $github_err = 'githubアカウントのリンクを入力してください';
     }
 
+    // プロジェクト数
+    if (is_numeric($_POST['project_num']) || empty($_POST['project_num'])) {
+        $update_num = <<<SQL
+            UPDATE accounts
+                SET project_num=?
+            WHERE user_id=?
+        SQL;
+        $sql = $pdo -> prepare($update_num);
+        $sql -> execute([$_POST['project_num'], ID]);
+    } else {
+        $pronum_err = '数値で入力してください';
+    }
+
+    //プロジェクト名、画像
+
+    // Count total files
+    $countfiles = count($_FILES['files']['name']);
+
+    // Prepared statement
+    $query = "UPDATE accounts SET project_name=?, project_image=? WHERE user_id=?";
+
+    $statement = $pdo -> prepare($query);
+
+    // Loop all files
+    for($i = 0; $i < $countfiles; $i++) {
+
+        // File name
+        $filename = $_FILES['files']['name'][$i];
+
+        // Location
+        $target_file = '../../project_img/'.$filename;
+
+        // file extension
+        $file_extension = pathinfo(
+            $target_file, PATHINFO_EXTENSION);
+
+        $file_extension = strtolower($file_extension);
+
+        // Valid image extension
+        $valid_extension = array("png","jpeg","jpg");
+
+        if(in_array($file_extension, $valid_extension)) {
+
+            // Upload file
+            if(move_uploaded_file(
+                $_FILES['files']['tmp_name'][$i],
+                $target_file)
+            ) {
+
+                // Execute query
+                $statement -> execute([$_POST['project_title'], $target_file, ID]);
+            }
+        }
+    }
+
     // template_id
     if (isset($_POST['template'])) {
         $s = <<< SQL
@@ -162,7 +235,6 @@ if (isset($_POST['success'])) {
         $sql -> execute([$_POST['template'], ID]);
     }
 
-
     // 公開するかどうか
     $s = <<<SQL
         UPDATE accounts
@@ -172,8 +244,8 @@ if (isset($_POST['success'])) {
     $sql = $pdo -> prepare($s);
     $sql -> execute([$_POST['release'][0], ID]);
 
-    if (empty($image_err) && empty($couse_err) && empty($github_err)) {
-        // header('Location: ./userprofile.php');
+    if (empty($image_err) && empty($couse_err) && empty($github_err) && empty($pronum_err)) {
+        header('Location: ./userprofile.php');
     }
 }
 
@@ -182,8 +254,6 @@ $s = <<<SQL
     FROM accounts
             LEFT OUTER JOIN couses
                 ON accounts.couse_id=couses.couse_id
-            LEFT OUTER JOIN programming_lans
-                ON accounts.user_id=programming_lans.user_id
     WHERE accounts.user_id=?
 SQL;
 $sql = $pdo -> prepare($s);
@@ -196,10 +266,14 @@ $user_mail = $user_info['user_mail'];
 $profile_img = $user_info['profile_img'];
 $bg_color = $user_info['bg_color'];
 $couse_id = $user_info['couse_id'];
+$introduction = $user_info['introduction'];
 $github_account = $user_info['github_account'];
+$project_num = $user_info['project_num'];
+$project_title = $user_info['project_name'];
+$project_img = $user_info['project_image'];
 $template_id = $user_info['template_id'];
 $release = $user_info['release_flg'];
-$introduction = $user_info['introduction'];
+//programing language 処理開始
 
 $pro_lan_select = <<<SQL
     SELECT *
@@ -208,7 +282,11 @@ $pro_lan_select = <<<SQL
 SQL;
 $sql = $pdo -> prepare($pro_lan_select);
 $sql -> execute([ID]);
-$programming_lans = $sql -> fetchAll(PDO::FETCH_ASSOC);
+$pro_lans = $sql -> fetchAll(PDO::FETCH_ASSOC);
+
+//programing language 処理終了
+
+//資格処理開始
 
 $qual_select = <<<SQL
     SELECT *
@@ -219,19 +297,34 @@ $sql = $pdo -> prepare($qual_select);
 $sql -> execute([ID]);
 $qual = $sql -> fetchAll(PDO::FETCH_ASSOC);
 
+//資格処理終了
+
+//ツールスキル処理開始
+
+$tool_select = <<<SQL
+    SELECT *
+    FROM tools
+    WHERE user_id=?
+SQL;
+$sql = $pdo -> prepare($tool_select);
+$sql -> execute([ID]);
+$tool = $sql -> fetchAll(PDO::FETCH_ASSOC);
+
+//ツールスキル処理終了
+
 require_once('../header.php');
 require_once('../navbar.php');
 ?>
-
+<link rel="stylesheet" href="../../includes/css/profile_edit.css">
 <div class="container light-style pt-4">
 
     <!-- ヘッダー スタート-->
-    <h2 class="text-center font-weight-bold py-2 mb-1">
+    <h2 class="text-center font-weight-bold py-2 mb-1 mt-5">
         アカウント設定
     </h2>
     <!-- ヘッダー 終了-->
 
-    <form action="userprofile.php" method="post" enctype="multipart/form-data">
+    <form action="profile_edit.php" method="post" enctype="multipart/form-data">
 
     <!-- 左側のアカウント詳細 navigation スタート-->
         <div class="card overflow-hidden">
@@ -243,8 +336,6 @@ require_once('../navbar.php');
                         <a class="list-group-item list-group-item-action" data-toggle="list" href="#account-info">About</a>
 
                         <a class="list-group-item list-group-item-action" data-toggle="list" href="#account-project">プロジェクト</a>
-
-                        <a class="list-group-item list-group-item-action" data-toggle="list" href="#account-change-password">パスワードを変更</a>
 
                         <a class="list-group-item list-group-item-action" data-toggle="list" href="#account-change-template">テンプレート</a>
                     </div>
@@ -259,7 +350,7 @@ require_once('../navbar.php');
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label class="form-label">プロフィール画像</label>
+                                        <label class="form-label"><strong><i class="fa fa-picture-o mr-2" aria-hidden="true"></i>プロフィール画像</strong></label>
                                             <div class="form-group">
                                                 <input type="file" id="profile_img" class="img_upload" name="profile_img" accept=".png, .jpeg, .jpg, .gif">
                                                 <input type="checkbox" id="img_delete" name="img_delete" value="1">
@@ -275,7 +366,7 @@ require_once('../navbar.php');
                                             </div>
                                         </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">背景色選択</label>
+                                        <label class="form-label"><strong><i class="fa fa-id-badge mr-2" aria-hidden="true"></i>背景色選択</strong></label>
                                         <div class="form-group">
                                             <input type="color" id="exampleColorInput" class="form-control form-control-color" name="bg_color" value="<?= (isset($bg_color)) ? $bg_color : '#FFFFFF' ; ?>" title="背景の色を選んでください" style="width: 50%; height: 15vh;">
                                         </div>
@@ -284,13 +375,11 @@ require_once('../navbar.php');
 
     <!-- プロフィール画像 終了 -->
 
-
-
                                 <hr class="border-secondary my-3">
 
     <!-- ユーザー名 スタート 完-->
                                 <div class="col-12">
-                                    <label class="form-label">ユーザー名</label>
+                                    <label class="form-label"><strong><i class="fa fa-user mr-2" aria-hidden="true"></i>ユーザー名</strong></label>
                                     <div class="form-control-static col-6">
                                         <?= $user_name ?>
                                     </div>
@@ -301,7 +390,7 @@ require_once('../navbar.php');
 
     <!-- ユーザーメール 完-->
                                 <div class="col-12">
-                                    <label class="form-label">メールアドレス</label>
+                                    <label class="form-label"><strong><i class="fa fa-address-book mr-2" aria-hidden="true"></i>メールアドレス</strong></label>
                                     <div class="form-control-static col-6">
                                         <?= $user_mail ?>
                                     </div>
@@ -313,9 +402,9 @@ require_once('../navbar.php');
     <!--専攻 スタート 完-->
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label class="form-label">専攻</label>
+                                        <label class="form-label"><strong><i class="fa fa-graduation-cap mr-2" aria-hidden="true"></i>専攻</strong></label>
                                         <div class="col-6">
-                                            <select class="custom-select  <?= (!empty($couse_err)) ? 'is-invalid' : ''; ?>" name="couse">
+                                            <select class="custom-select <?= (!empty($couse_err)) ? 'is-invalid' : ''; ?>" name="couse">
                                                 <?= couse($couse_id); ?>
                                             </select>
                                             <span class="invalid-feedback"><?= $couse_err; ?></span>
@@ -336,8 +425,8 @@ require_once('../navbar.php');
     <!-- 自己紹介 開始 未-->
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label class="form-label">自己アピール/自己紹介</label><!--自己アピール/自己紹介どっちにする？-->
-                                        <textarea class="form-control" name="introduction" rows="" placeholder = "私は本科生で、ｃ言語の勉強しています。先輩方から助けてもらってする事で感動しています。先輩方と同じく頼りになる人になりたいです。"></textarea>
+                                        <label class="form-label"><strong><i class="fa fa-bullhorn mr-2" aria-hidden="true"></i>自己アピール/自己紹介</strong></label><!--自己アピール/自己紹介どっちにする？-->
+                                        <textarea class="form-control" name="introduction" rows="5" placeholder = "私は本科生で、ｃ言語の勉強しています。先輩方から助けてもらってする事で感動しています。先輩方と同じく頼りになる人になりたいです。"><?= $introduction ?></textarea>
                                     </div>
                                 </div>
     <!-- 自己紹介 終了-->
@@ -347,20 +436,20 @@ require_once('../navbar.php');
     <!-- プログラミング言語 開始 未 -->
                                 <div class="col-12">
                                     <div id="lans-area" class="form-group">
-                                        <label class="form-label">プログラミング言語</label>
+                                        <label class="form-label"><strong><i class="fa fa-code mr-2"></i>プログラミング言語</strong></label>
                                         <?php
-                                        if (empty($programming_lans)) {
+                                        if (empty($pro_lans)) {
                                             echo <<<HTML
                                                 <div class="unit input-group mb-2">
-                                                    <input type="text" class="form-control" name="programming_lans[]" placeholder="programming_language" aria-describedby="button-addon2">
+                                                    <input type="text" class="form-control" name="programming_lans[]" placeholder="例）ｃ言語/HTML/PHP" aria-describedby="button-addon2">
                                                     <button type="button" id="button-addon2" class="lans-minus btn btn-outline-danger">ー</button>
                                                 </div>
                                             HTML;
                                         } else {
-                                            foreach ($programming_lans as $row) {
+                                            foreach ($pro_lans as $row) {
                                                 echo <<<HTML
                                                     <div class="unit input-group mb-2">
-                                                        <input type="text" class="form-control" name="programming_lans[]" placeholder="programming_language" aria-describedby="button-addon2" value="$row[programming_lan]">
+                                                        <input type="text" class="form-control" name="programming_lans[]" placeholder="例）ｃ言語/HTML/PHP" aria-describedby="button-addon2" value="$row[programming_lan]">
                                                         <button type="button" id="button-addon2" class="lans-minus btn btn-outline-danger">ー</button>
                                                     </div>
                                                 HTML;
@@ -380,12 +469,12 @@ require_once('../navbar.php');
     <!-- 資格 開始 -->
                                 <div class="col-12">
                                     <div id="qual-area" class="form-group">
-                                        <label class="form-label">資格</label>
+                                        <label class="form-label"><strong><i class="fa fa-certificate mr-2" aria-hidden="true"></i>資格</strong></label>
                                         <?php
                                         if (empty($qual)) {
                                             echo <<<HTML
                                                 <div class="unit2 input-group mb-2">
-                                                    <input type="text" class="form-control" name="qual_name[]" placeholder="例）i.tパスポート" aria-describedby="button-addon1">
+                                                    <input type="text" class="form-control" name="qual_name[]" placeholder="例）i.t.パスワード/TOEIC/情報検定 " aria-describedby="button-addon1">
                                                     <button type="button" id="button-addon1" class="qual-minus btn btn-outline-danger">ー</button>
                                                 </div>
                                             HTML;
@@ -393,7 +482,7 @@ require_once('../navbar.php');
                                             foreach ($qual as $row) {
                                             echo <<<HTML
                                                 <div class="unit2 input-group mb-2">
-                                                    <input type="text" class="form-control" name="qual_name[]" placeholder="例）i.tパスポート" aria-describedby="button-addon1" value="$row[qual_name]">
+                                                    <input type="text" class="form-control" name="qual_name[]" placeholder="例）i.t.パスワード/TOEIC/情報検定" aria-describedby="button-addon1" value="$row[qual_name]">
                                                     <button type="button" id="button-addon1" class="qual-minus btn btn-outline-danger">ー</button>
                                                 </div>
                                             HTML;
@@ -405,8 +494,44 @@ require_once('../navbar.php');
                                         <button type="button" id="qual-plus" class="btn btn-outline-primary btn-lg">＋ <small>※5個まで</small></button>
                                     </div>
                                 </div>
+
+                                <hr class="border-secondary my-3">
+
+    <!-- ツールスキル 開始 -->
+                                <div class="col-12">
+                                    <div id="tool-area" class="form-group">
+                                        <label class="form-label"><strong>ツールスキル</strong></label>
+                                        <?php
+                                        if (empty($tool)) {
+                                            echo <<<HTML
+                                                <div class="unit3 input-group mb-2">
+                                                    <input type="text" class="form-control" name="tool_name[]" placeholder="例）GIT/Bootstrap/NPM" aria-describedby="button-addon0">
+                                                    <button type="button" id="button-addon0" class="tool-minus btn btn-outline-danger">ー</button>
+                                                </div>
+                                            HTML;
+                                        } else {
+                                            foreach ($tool as $row) {
+                                            echo <<<HTML
+                                                <div class="unit3 input-group mb-2">
+                                                    <input type="text" class="form-control" name="tool_name[]" placeholder="例）GIT/Bootstrap/NPM" aria-describedby="button-addon0" value="$row[tool_name]">
+                                                    <button type="button" id="button-addon0" class="tool-minus btn btn-outline-danger">ー</button>
+                                                </div>
+                                            HTML;
+                                            }
+                                        }
+                                        ?>
+                                    </div>
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="button" id="tool-plus" class="btn btn-outline-primary btn-lg">＋ <small>※5個まで</small></button>
+                                    </div>
+                                </div>
+    <!-- ツールスキル 開始 -->
+
+                                <hr class="border-secondary my-3">
+
                             </div>
                         </div>
+
     <!-- アバウト 終了 -->
 
     <!-- ユーザープロジェクト 開始 未-->
@@ -414,92 +539,42 @@ require_once('../navbar.php');
                         <div id="account-project" class="tab-pane fade">
                             <div class="card-body">
                                 <div class="col-4">
-                                    <label class="form-label"><strong>GitHUB</strong>リンク</label>
-                                    <input type="text" class="form-control" name="github" value="<?= $github_account ?>">
+                                    <label class="form-label"><strong><i class="fa fa-link mr-2" aria-hidden="true"></i>GitHUB</strong>リンク</label>
+                                    <input type="text" class="form-control <?= (!empty($github_err)) ? 'is-invalid' : ''; ?>" name="github" value="<?= $github_account ?>">
+                                    <span class="invalid-feedback"><?= $pronum_err; ?></span>
                                 </div>
-                                <label class="form-label">ユーザー名</label>
+
                                 <hr class="border-secondary my-3">
+                                <div class="col-4">
+                                    <label class = "form-label"><strong><i class="fa fa-sort-numeric-asc mr-2" aria-hidden="true"></i>プロジェクト数</strong></label>
+                                    <input type = "text" class= "form-control <?= (!empty($pronum_err)) ? 'is-invalid' : ''; ?>" name= "project_num" value="<?= $project_num ?>">
+                                    <span class="invalid-feedback"><?= $pronum_err; ?></span>
+                                </div>
                                 <hr class="border-secondary my-3">
+                        <!--プロジェット処理のファイル-project_upload.js-->
                                 <script language="JavaScript" src="../../includes/js/project_upload.js"></script>
+                        <!--project_upload.js ファイル -->
                                 <div class="col-5">
-                                <div class="center mb-5">
-                                        <label class="form-label"><strong>プロジェット</strong>タイトル</label>
-                                    <input class="form-control form-control-sm mb-5" type="text" placeholder="タイトル">
-                                    <div class="form-input">
-                                        <label for="file-ip-1">
+                                    <div class="center mb-5">
+                                        <label class="form-label"><strong><i class="fa fa-asterisk mr-2" aria-hidden="true"></i>プロジェクト</strong>タイトル</label>
+                                        <input type="text" class="form-control form-control-sm mb-5" name="project_title" placeholder="タイトル" value="<?= $project_title ?>">
+                                        <div class="form-input">
+                                            <label for="file-ip-1">
+                                            <img id="file-ip-1-preview" name="files[]" src="../../includes/images/upcolor.png">
+                                            <button type="button" class="imgRemove" onclick="myImgRemove(1)"></button>
+                                            </label>
 
-
-                                        <img id="file-ip-1-preview" src="../../includes/images/upcolor.png">
-                                        <button type="button" class="imgRemove" onclick="myImgRemove(1)"></button>
-                                        </label>
-
-                                        <input type="file"  name="img_one" id="file-ip-1" accept="image/*" onchange="showPreview(event, 1);">
-                                    </div>
-                                    <small class="small">&#8634;を使用して、 画像をリセットするアイコン</small>
+                                            <input type="file" name="files[]" id="file-ip-1" accept="image/*" onchange="showPreview(event, 1);">
+                                        </div>
+                                        <small class="small">&#8634;を使用して、 画像をリセットするアイコン</small>
                                     </div>
                                 </div>
-
-
-
-                                <!--<form method="post" id="uploadForm" enctype="multipart/form-data">
-                                    <input type="file" id="user_profile" name="user_profile" />
-                                    <input type="button" class="button" value="Upload File" id="btn_upload">
-                                </form>
-                                <div class="upload_image"></div>-->
-
-
-    <!-- ポートフォリオ 開始 未-->
-                                <!-- <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="form-label">ポートフォリオ</label>
-
-
-
-                                        <input type="file" id="profile_img" class="img_upload" name="profile_img" accept=".png, .jpeg, .jpg, .gif">
-                                        <input type="checkbox" id="img_delete" name="img_delete" value="1">
-                                        <img src="<?= $portfolio_img ?>" id="tl_img" class="img_preview" style="width: 100px;">
-                                        <div class="<?= (empty($profile_img)) ? 'mt-2' : ''; ?>">
-                                            <label for="profile_img" class="btn btn-outline-primary">
-                                                アップロード
-                                            </label>
-                                            <label for="img_delete" class="btn btn-outline-danger" name="delete" style="<?= (empty($profile_img)) ? 'display: none;' : ''; ?>">
-                                                削除
-                                            </label>
-                                            <div class="text-light small mt-1">許可されているJPG、GIF、またはPNG。 最大サイズ800K</div>
-                                        </div>
-                                    </div>
-                                </div> -->
-    <!-- ポートフォリオ 終了-->
 
                             <hr class="border-secondary my-3">
 
     <!--ユーザープロジェクト 終了-->
                             </div>
                         </div>
-
-
-
-    <!--パスワード スタート 未-->
-                        <div id="account-change-password" class="tab-pane fade">
-                            <div class="card-body pb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Current password</label>
-                                    <input type="password" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">New password</label>
-                                    <input type="password" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Repeat new password</label>
-                                    <input type="password" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-    <!--パスワード 終了 -->
-
 
     <!-- テンプレート 開始 未-->
                         <div id="account-change-template" class="tab-pane fade">
@@ -511,169 +586,24 @@ require_once('../navbar.php');
                         </div>
     <!-- テンプレート 終了 -->
 
-
-            <!-- 未定機能 linked.in / code.pen / google.drive/+ / dropbox プロファイルリンク-->
-            <!--    <div class="tab-pane fade" id="account-links">
-                        <div class="card-body pb-2">
-                            <div class="form-group">
-                                <label class="form-label">linked.in</label>
-                                <input type="text" class="form-control" value="">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Google/drive/+</label>
-                                <input type="text" class="form-control" value="">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">LinkedIn</label>
-                                <input type="text" class="form-control" value="">
-                            </div>
-
-                        </div>
-                    </div> -->
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
             <input type="checkbox" name="release[]" value="1" data-width="100" data-height="48" data-toggle="toggle" data-on="公開" data-off="非公開" data-onstyle="success" data-offstyle="danger" <?= ($release) ? 'checked' : '' ?>>
             <input type="hidden" name="release[]" value="0">
-            <input type="submit" class="btn btn-primary btn-lg" name="success" value="確定" style="width: 100px;">
+            <input type="submit" class="btn btn-primary btn-lg" name="success" value="確定" style="width: 100px;" onclick="window.onbeforeunload = null;">
         </div>
     </form>
 </div>
 
-<!--CSS-->
-<style type="text/css">
-body{
-    background: #f5f5f5;
-}
-
-.ui-w-80 {
-    width: 80px !important;
-    height: auto;
-}
-
-.btn-default {
-    border-color: rgba(24,28,33,0.1);
-    background: rgba(0,0,0,0);
-    color: #4E5155;
-}
-
-label.btn {
-    margin-bottom: 0;
-}
-
-.btn-outline-primary {
-    border-color: #26B4FF;
-    background: transparent;
-    color: #26B4FF;
-}
-
-.btn {
-    cursor: pointer;
-}
-
-.text-light {
-    color: #babbbc !important;
-}
-
-.btn-facebook {
-    border-color: rgba(0,0,0,0);
-    background: #3B5998;
-    color: #fff;
-}
-
-.btn-instagram {
-    border-color: rgba(0,0,0,0);
-    background: #000;
-    color: #fff;
-}
-
-.card {
-    background-clip: padding-box;
-    box-shadow: 0 1px 4px rgba(24,28,33,0.012);
-}
-
-.card {
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 15px 1px rgba(52,40,104,.08);
-}
-.card {
-    position: relative;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: #fff;
-    background-clip: border-box;
-    border: 1px solid #e5e9f2;
-    border-radius: .2rem;
-}
-.card-header:first-child {
-    border-radius: calc(.2rem - 1px) calc(.2rem - 1px) 0 0;
-}
-.card-header {
-    border-bottom-width: 1px;
-}
-.card-header {
-    padding: .75rem 1.25rem;
-    margin-bottom: 0;
-    color: inherit;
-    background-color: #fff;
-    border-bottom: 1px solid #e5e9f2;
-}
-
-
-.row-bordered {
-    overflow: hidden;
-}
-
-.account-settings-fileinput {
-    position: absolute;
-    visibility: hidden;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-}
-.account-settings-links .list-group-item.active {
-    font-weight: bold !important;
-}
-html:not(.dark-style) .account-settings-links .list-group-item.active {
-    background: transparent !important;
-}
-.account-settings-multiselect ~ .select2-container {
-    width: 100% !important;
-}
-.light-style .account-settings-links .list-group-item {
-    padding: 0.85rem 1.5rem;
-    border-color: rgba(24, 28, 33, 0.03) !important;
-}
-.light-style .account-settings-links .list-group-item.active {
-    color: #4e5155 !important;
-}
-.material-style .account-settings-links .list-group-item {
-    padding: 0.85rem 1.5rem;
-    border-color: rgba(24, 28, 33, 0.03) !important;
-}
-.material-style .account-settings-links .list-group-item.active {
-    color: #4e5155 !important;
-}
-.dark-style .account-settings-links .list-group-item {
-    padding: 0.85rem 1.5rem;
-    border-color: rgba(255, 255, 255, 0.03) !important;
-}
-.dark-style .account-settings-links .list-group-item.active {
-    color: #fff !important;
-}
-.light-style .account-settings-links .list-group-item.active {
-    color: #4E5155 !important;
-}
-.light-style .account-settings-links .list-group-item {
-    padding: 0.85rem 1.5rem;
-    border-color: rgba(24,28,33,0.03) !important;
-}
-</style>
 
 <?php require_once('../footer.php'); ?>
+
+<script>
+    window.onbeforeunload = function(e) {
+        e.returnValue = "ページを離れようとしています。よろしいですか？";
+    }
+</script>

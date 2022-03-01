@@ -31,13 +31,13 @@ input[type=radio]+label:before{
 }
 
 input[type=radio][value="1"]+label:before{
-    background-image: url(../../includes/images/template1.jpg);
+    background-image: url(../../includes/images/template_1.jpg);
 }
 input[type=radio][value="2"]+label:before{
-    background-image: url(../../includes/images/template2.png);
+    background-image: url(../../includes/images/template_2.png);
 }
 input[type=radio][value="3"]+label:before{
-    background-image: url(../../includes/images/template3.png);
+    background-image: url(../../includes/images/template_3.png);
 }
 
 input[type=radio]:checked+label::before{
@@ -107,6 +107,7 @@ html,body{
     padding: 0;
     margin: 0;
     height: 100%;
+	font-family: "Marcellus", serif !important;
 }
 
 
@@ -223,6 +224,7 @@ body{
 	-webkit-transition : all 0.3s ease-out;
 	transition : all 0.3s ease-out;
 }
+
 .navbar{
 	padding: 0;
 }
@@ -469,7 +471,7 @@ h1 span:nth-child(15){
 #switch {
 	width: 60px;
 	height: 8px;
-	border: 2px solid #8167a9;
+	border: 2px solid rgb(170, 238, 250);
 	border-radius: 27px;
 	background: #000;
 	position: relative;
@@ -497,7 +499,7 @@ body.hero-anime #switch{
 }
 .switched {
 	border-color: #000 !important;
-	background: #8167a9 !important;
+	background: #67a1a9 !important;
 }
 .switched #circle {
 	left: 43px;
@@ -545,7 +547,8 @@ body.hero-anime #switch{
 .dropdown-item:hover,
 .dropdown-item:focus {
 	color: #fff;
-	background-color: rgba(129,103,169,.6);
+/* navigation bar の　hover する　色*/
+	background-color: rgba(78, 133, 250, 0.6);
 }
 
 body.dark{

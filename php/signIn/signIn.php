@@ -1,4 +1,5 @@
 <?php
+
 //Session Start
 //セッション開始
 session_start();
@@ -95,8 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     'user_id' => $row['user_id'], 'user_name' => $row['user_name'], 'user_mail' => $row['user_mail']
                                 ];
                             }
-
-                            header('Location: ../home/index.php');
+                            header('Location: ../home/');
                         } else {
 
                             // Display wrong password message
@@ -134,24 +134,24 @@ require_once('../navbar.php');
 ?>
 
 <div class="container">
-    <div class="row">
+    <div class="row mt-5">
         <div class="col-md-6 mx-auto">
             <div class="card card-body bg-light mt-5">
                 <h2>ログイン</h2>
                 <form action="<?= $_SERVER['PHP_SELF']; ?>" method="POST">
                     <div class="form-group mt-3">
-                        <label for="mail">メール</label>
+                        <label for="mail"><i class="fa fa-envelope mr-2" aria-hidden="true"></i>メール</label>
                         <input type="mail" name="user_mail" class="form-control form-control-lg <?= (!empty($user_mail_err)) ? 'is-invalid' : ''; ?>" value="<?= $user_mail; ?>" autofocus>
                         <span class="invalid-feedback"><?= $user_mail_err; ?></span>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="password">パスワード</label>
+                        <label for="password"><i class="fa fa-unlock-alt mr-2" aria-hidden="true"></i>パスワード</label>
                         <input type="password" name="password" class="form-control form-control-lg <?= (!empty($password_err)) ? 'is-invalid' : '';?>">
                         <span class="invalid-feedback"><?= $password_err; ?></span>
                     </div>
                     <div class="form-row mt-3">
                         <div class="col">
-                            <input type="submit" value="ログイン" class="btn btn-success btn-block">
+                        <input type="submit" value="ログイン" class="btn btn-success btn-block">
                         </div>
                         <div class="col">
                             <a href="../signUp/signUp.php" class="btn btn-light btn-block">アカウントをお持ちでない方はこちら 登録</a>

@@ -36,20 +36,16 @@ $id_select = <<<SQL
     FROM chat
     WHERE user_id=? AND receiver_id=?
 SQL;
-$sql -> $pdo -> preare($id_select);
+$sql = $pdo -> prepare($id_select);
 $sql -> execute([ID, $receiver_id]);
 $max_id = $sql -> fetch(PDO::FETCH_ASSOC);
 
-$_SESSION['test'] = [
-    'id' => $max_id['chat_id']
-];
-
-$update_select = <<<SQL
+$inorup = <<<SQL
     SELECT chat_id
     FROM last_updates
     WHERE user_id=? AND receiver_id=?
 SQL;
-$sql = $pdo -> prepare($update_select);
+$sql = $pdo -> prepare($inorup);
 $sql -> execute([ID, $receiver_id]);
 
 if (!($sql -> fetch(PDO::FETCH_ASSOC))) {
@@ -57,11 +53,11 @@ if (!($sql -> fetch(PDO::FETCH_ASSOC))) {
         INSERT INTO last_updates(user_id, receiver_id, chat_id) values(?, ?, ?)
     SQL;
     $sql = $pdo -> prepare($insert_id);
-    $sql -> execute([ID, $receiver_id, $max_id['chat_id']]);
+    $sql -> execute([ID, $receiver_id, $max_id['MAX(chat_id)']]);
 } else {
     $update_id = <<<SQL
         UPDATE last_updates SET chat_id=? WHERE user_id=? AND receiver_id=?
     SQL;
     $sql = $pdo -> prepare($update_id);
-    $sql -> execute([$max_id['chat_id'], ID, $receiver_id]);
+    $sql -> execute([$max_id['MAX(chat_id)'], ID, $receiver_id]);
 }
