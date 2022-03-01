@@ -3,4 +3,4 @@
 <br>
 URL
 https://weblike-upcolor.ssl-lolipop.jp/UpColor/php/home/
-<img src="img_girl.jpg" alt="Girl in a jacket" width="500" height="600">
+<img src="project_img/project.png" alt="Upcolor" width="500" height="600">
