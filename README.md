@@ -1,5 +1,6 @@
-# Upcolor
 <p align="center">
+  # Upcolor
+
 進級制作-GTM Team
 <br>
 URL
